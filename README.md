@@ -8,7 +8,7 @@ You can connect to these views with Arcgis desktop (>= 10.6) and [load data](htt
 
 ## Principle
 
-It replace qwat_vl tables in views (without touching original) with a correspondance table containing the original id and the AquaFri's code.
+It replace qwat_vl tables in views with a correspondance table containing the original id and the AquaFri's code.
 
 Sample for status table
 
@@ -17,3 +17,10 @@ Sample for status table
 | 101      | ES |
 | 1302     | HS     |
 | 1307 | PL     |
+
+All relations are registered in an openOffice sheets under the folder "relations", to be customized for you need. 
+You can apply your adjustments in the "csv" tab, save it under .csv format (utf-8) and reinstall the extension to apply. 
+
+## Cautions
+That's a work in progress ...
+Actually, no AquaFri's specific field is imported into qwat
