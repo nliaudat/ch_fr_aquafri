@@ -18,11 +18,11 @@ Sample for status table
 | 1302     | HS     |
 | 1307 | PL     |
 
-All relations are registered in an openOffice sheets under the folder "relations", to be customized for your need. 
+All relations are registered in openOffice sheets under the folder "relations", to be customized for your need. 
 You can apply your adjustments in the "csv" tab, save it under .csv format (utf-8) and reinstall the extension to apply. 
 
 ## Cautions
 That's a work in progress ...
 Actually, no AquaFri's specific field is imported into qwat
 
-Some [values](https://github.com/nliaudat/ch_fr_aquafri/tree/master/values) are added to qwat_vl tables and are not deleted after droping the extension.
+Some [values](https://github.com/nliaudat/ch_fr_aquafri/tree/master/values) are added to qwat_vl tables and are not deleted after dropping the extension.
