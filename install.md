@@ -1,7 +1,4 @@
-
-
-
-Check your postgresql service definition under
+# Check your postgresql service definition
 
 nano /root/.pg_service.conf
 
@@ -12,5 +9,6 @@ port=5432
 user=postgres
 password=yours;)
 
+#launch install
 
 ./init_aquafri.sh -p qwat
