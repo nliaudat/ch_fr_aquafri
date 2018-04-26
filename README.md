@@ -21,7 +21,7 @@ Sample for status table
 All relations are registered in openOffice sheets under the folder "relations", to be customized for your need. 
 You can apply your adjustments in the "csv" tab, save it under .csv format (utf-8) and reinstall the extension to apply. 
 
-## Cautions
+## Warning
 That's a work in progress ...
 Actually, no AquaFri's specific field is imported into qwat
 
