@@ -26,3 +26,6 @@ That's a work in progress ...
 Actually, no AquaFri's specific field is imported into qwat
 
 Some [values](https://github.com/nliaudat/ch_fr_aquafri/tree/master/values) are added to qwat_vl tables and are not deleted after dropping the extension.
+
+## Install
+[Install procedure](https://github.com/nliaudat/ch_fr_aquafri/blob/master/install.md)
