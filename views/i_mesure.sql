@@ -6,8 +6,8 @@ Cette classe regroupe quelques installations de mesures.
 Nom_numero: le nom ou numéro distinctif de l’installation en question 
 Type_mesure : son domaine des valeurs comprend : 
 	 debitmetre (DM) : toutes les installations de mesure de débit dans le réseau de transport et de distribution, à l’exception des compteurs sur les raccordements privés 
-	 turbidimetre (TM) 
-	 chlorimetre (CM) : mesure du chlore residuel 
+	 turbidimetre (TM) : mesure de la turbidite, pas dans Qwat
+	 chlorimetre (CM) : mesure du chlore residuel, pas dans Qwat 
 Type_transmission : Son domaine des valeurs comprend : 
 	cable (CA) 
 	radio (RA) 
@@ -54,5 +54,6 @@ Zone_pression : Code unique qui indique l’appartenance d’un objet à une zon
 			WHERE part.fk_part_type = 9210 -- débitmètre
 			;
 	
-	
-		
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.i_mesure TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_mesure TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_mesure TO qwat_manager;

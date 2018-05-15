@@ -27,7 +27,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_pompe AS
 		remote.code AS Type_transmission,
 		null AS Centrale_id,
 		installation.no_pumps AS Nbr_pompes,
-		installation.rejected_flow AS Q_refoulement,
+		installation.rejected_flow::INTEGER AS Q_refoulement,
 		element.altitude AS Niv,
 		installation.manometric_height AS H_mano,
 		element.year AS Annee_installation,
@@ -58,4 +58,6 @@ FROM qwat_od.vw_qwat_installation installation
 		installation.installation_type = 'pump'
 	;
 
-		
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.i_pompe TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_pompe TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_pompe TO qwat_manager;

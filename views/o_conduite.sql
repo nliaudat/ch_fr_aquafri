@@ -38,12 +38,13 @@ Zone_pression : Code unique qui indique l’appartenance d’un objet à une zon
 CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_conduite AS
 
 	SELECT 
+		--row_number() OVER() AS "id",
 		pipe.id AS OBJECTID,
 		pipe_function.code AS Fonction_conduite,
 		pipe_material_code.code AS Type_materiau,
 		null AS Subtype_materiau,
-		round(pipe_material.diameter_internal) AS Diam_interieur, -- integer
-		round(pipe_material.diameter_external) AS Diam_exterieur, -- integer
+		round(pipe_material.diameter_internal)::INTEGER AS Diam_interieur,
+		round(pipe_material.diameter_external)::INTEGER AS Diam_exterieur,
 		pipe.pressure_nominal AS P_admise,
 		pipe.year AS Annee_construction,
 		precision.code AS Precision_plan,
@@ -55,7 +56,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_conduite AS
 		pipe._length2d AS SHAPE_Length,
 		pipe.fk_folder AS Dossier_id,
 		
-		pipe.label_1_text AS usr_etiquette,
+		-- pipe.label_1_text AS usr_etiquette,
 		
 		ST_Force2D(pipe.geometry) AS geometry
 
@@ -71,4 +72,6 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_conduite AS
 		LEFT JOIN qwat_ch_fr_aquafri.status status ON pipe.fk_status = status.id
 	;
 	
-	
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.o_conduite TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_conduite TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_conduite TO qwat_manager;

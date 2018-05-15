@@ -78,3 +78,6 @@ FROM qwat_od.vw_qwat_installation installation
 		installation.installation_type = 'treatment'
 	;
 	
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.i_traitement TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_traitement TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_traitement TO qwat_manager;

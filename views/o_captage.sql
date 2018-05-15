@@ -35,11 +35,9 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_captage AS
 		COALESCE(installation.name, element.identification)  AS Nom,
 
 		CASE 
-			WHEN installation.fk_source_type = 2701 THEN 'CS' -- captage eau lac
-			WHEN installation.fk_source_type = 2702 THEN 'PV' -- captage eau nappe
-			WHEN installation.fk_source_type = 2703 THEN 'SO' -- captage eau source
-			WHEN installation.fk_source_type = 2704 THEN 'CS' -- captage eau rivière
-			WHEN gathering_chamber = true then 'CR' 
+			WHEN gathering_chamber = true THEN 'CR' -- chambre de rassemblement
+			WHEN fk_pressurecontrol_type =2803 THEN 'CR' -- chambre de rassemblement
+			ELSE source_type.code
 		END as Type_captage,
 
 		null AS Niv_eau,
@@ -48,8 +46,8 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_captage AS
 		null AS Prof_crepine,
 		null AS Nbr_drains,
 		null AS Diam_puits,
-		installation.flow_lowest AS Q_min,
-		installation.flow_average AS Q_moy,
+		installation.flow_lowest::INTEGER AS Q_min,
+		installation.flow_average::INTEGER AS Q_moy,
 		null AS Q_max,
 		installation.flow_concession AS Q_concession,
 		year AS Annee_construction,
@@ -76,6 +74,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_captage AS
 FROM qwat_od.vw_qwat_installation installation
      JOIN qwat_od.vw_node_element element ON installation.id = element.id
 	 
+		LEFT JOIN qwat_ch_fr_aquafri.source_type source_type ON installation.fk_source_type = source_type.id
 		LEFT JOIN qwat_od.pressurezone pressurezone ON element.fk_pressurezone = pressurezone.id
 		LEFT JOIN qwat_ch_fr_aquafri.remote_type remote ON installation.fk_remote = remote.id
 		LEFT JOIN qwat_ch_fr_aquafri.precision precision ON element.fk_precision = precision.id
@@ -84,4 +83,10 @@ FROM qwat_od.vw_qwat_installation installation
 	 
 		WHERE
 		installation.installation_type = 'source'
+		OR
+		installation.installation_type = 'pressurecontrol' AND fk_pressurecontrol_type =2803 -- rassemblement
 	;
+	
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.o_captage TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_captage TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_captage TO qwat_manager;

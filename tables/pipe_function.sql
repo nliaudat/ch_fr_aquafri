@@ -1,21 +1,3 @@
-
-/*
-CREATE  TABLE qwat_ch_fr_aquafri.pipe_function AS
-SELECT id, value_fr FROM qwat_vl.pipe_function
-ORDER BY id ASC LIMIT 100;
-
-
-ALTER TABLE qwat_ch_fr_aquafri.pipe_function
-    ADD COLUMN code_aquafri character varying(2);
-	
-ALTER TABLE qwat_ch_fr_aquafri.pipe_function
-    ADD COLUMN descr_aquafri character varying(50);
-	
-ALTER TABLE qwat_ch_fr_aquafri.pipe_function
-    ADD PRIMARY KEY (id);
-
-*/
-
 CREATE TABLE qwat_ch_fr_aquafri.pipe_function
 (
     id integer NOT NULL,
@@ -34,3 +16,7 @@ WITH (
 COPY qwat_ch_fr_aquafri.pipe_function
 FROM '/tmp/pipe_function.csv'
 CSV HEADER;
+
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.pipe_function TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.pipe_function TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.pipe_function TO qwat_manager;

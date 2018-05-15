@@ -65,3 +65,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_vanne AS
 		LEFT JOIN qwat_ch_fr_aquafri.status status ON valve.fk_status = status.id
 		LEFT JOIN qwat_od.distributor distributor ON valve.fk_distributor = distributor.id
 	;
+
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.i_vanne TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_vanne TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_vanne TO qwat_manager;

@@ -28,7 +28,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_chambre AS
 		COALESCE(installation.name, element.identification)  AS Nom,
 
 		'CG' AS Fonction_chambre,
-		
+		--CASE WHEN networkseparation IS TRUE THEN 'VA' ELSE 'CG' END AS Fonction_chambre, --specific for mgi
 		year AS Annee_construction,
 		precision.code AS Precision_plan,
 		distributor.name AS Proprietaire,
@@ -56,3 +56,7 @@ FROM qwat_od.vw_qwat_installation installation
 		WHERE
 		installation.installation_type = 'chamber'
 	;
+	
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.o_chambre TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_chambre TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_chambre TO qwat_manager;

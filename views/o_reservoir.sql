@@ -32,9 +32,9 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_reservoir AS
 		
 		altitude_overflow AS Niv_eau,
 		
-		storage_supply AS V_utilisation,
-		null AS V_securite,
-		storage_fire AS V_incendie,
+		storage_supply::INTEGER AS V_utilisation,
+		null AS V_securite, --add in Qwat datamodel ?
+		storage_fire::INTEGER AS V_incendie,
 				
 		year AS Annee_construction,
 		null AS Annee_renovation,
@@ -65,3 +65,8 @@ FROM qwat_od.vw_qwat_installation installation
 		WHERE
 		installation.installation_type = 'tank'
 	;
+	
+	
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.o_reservoir TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_reservoir TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_reservoir TO qwat_manager;

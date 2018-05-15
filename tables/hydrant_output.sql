@@ -15,3 +15,7 @@ WITH (
 COPY qwat_ch_fr_aquafri.hydrant_output
 FROM '/tmp/hydrant_output.csv'
 CSV HEADER;
+
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.hydrant_output TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.hydrant_output TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.hydrant_output TO qwat_manager;

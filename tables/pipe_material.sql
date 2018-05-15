@@ -13,3 +13,7 @@ WITH (
 COPY qwat_ch_fr_aquafri.pipe_material
 FROM '/tmp/pipe_material.csv'
 CSV HEADER;
+
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.pipe_material TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.pipe_material TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.pipe_material TO qwat_manager;

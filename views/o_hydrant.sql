@@ -35,7 +35,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_hydrant AS
 		null AS Vidange_auto,
 		hydrant.pressure_static AS P_statique,
 		hydrant.pressure_dynamic AS P_dynamique,
-		hydrant.flow AS Q_dynamique,
+		hydrant.flow::INTEGER AS Q_dynamique,
 		null AS Resp_entretien,
 		element.year AS Annee_construction,
 		precision.code AS Precision_plan,
@@ -58,3 +58,6 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_hydrant AS
 		LEFT JOIN qwat_od.distributor distributor ON element.fk_distributor = distributor.id
 	;
 
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.o_hydrant TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_hydrant TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.o_hydrant TO qwat_manager;

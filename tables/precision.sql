@@ -13,3 +13,7 @@ WITH (
 COPY qwat_ch_fr_aquafri.precision
 FROM '/tmp/precision.csv'
 CSV HEADER;
+
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.precision TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.precision TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.precision TO qwat_manager;

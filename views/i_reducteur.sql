@@ -24,9 +24,13 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_reducteur AS
 		installation.id AS OBJECTID,
 		COALESCE(installation.name, element.identification)  AS Nom,
 		
-		'RE' AS Type_reducteur,
+		CASE WHEN fk_pressurecontrol_type = 2801 THEN 
+			'RE' -- réducteur
+		ELSE 
+			'BC' --coupe-pression
+		END AS Type_reducteur,
 		element.altitude AS Niv,
-		null AS H_sortie,
+		null AS H_sortie, --add in qwat datamodel ?
 
 		remote.code AS Type_transmission,
 		element.year AS Annee_installation,
@@ -56,7 +60,10 @@ FROM qwat_od.vw_qwat_installation installation
 		WHERE
 		installation.installation_type = 'pressurecontrol'
 		AND
-		fk_pressurecontrol_type = 2801-- réducteur
+		fk_pressurecontrol_type IN (2801,2802) -- réducteur, coupe-pression
 		
 	;
 	
+GRANT SELECT, REFERENCES, TRIGGER ON TABLE qwat_ch_fr_aquafri.i_reducteur TO qwat_viewer;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_reducteur TO qwat_user;
+GRANT ALL ON TABLE qwat_ch_fr_aquafri.i_reducteur TO qwat_manager;
