@@ -25,16 +25,16 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_chambre AS
 
 	SELECT 
 		installation.id AS OBJECTID,
-		COALESCE(installation.name, element.identification)  AS Nom,
+		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
 
 		'CG' AS Fonction_chambre,
 		--CASE WHEN networkseparation IS TRUE THEN 'VA' ELSE 'CG' END AS Fonction_chambre, --specific for mgi
 		year AS Annee_construction,
 		precision.code AS Precision_plan,
-		distributor.name AS Proprietaire,
+		LEFT(distributor.name,30) AS Proprietaire,
 		status.code AS Etat_exploitation,
 		null AS Mesure_plan,
-		element.remark AS Remarque,
+		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
 		element.orientation AS Orisymbole,
 		element.fk_folder AS Dossier_id,
 		

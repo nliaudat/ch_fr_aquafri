@@ -26,11 +26,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_reservoir AS
 
 	SELECT 
 		installation.id AS OBJECTID,
-		COALESCE(installation.name, element.identification)  AS Nom,
+		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
 
 		'RS' AS Type_reservoir,
 		
-		altitude_overflow AS Niv_eau,
+		altitude_overflow::DECIMAL  AS Niv_eau,
 		
 		storage_supply::INTEGER AS V_utilisation,
 		null AS V_securite, --add in Qwat datamodel ?
@@ -39,11 +39,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_reservoir AS
 		year AS Annee_construction,
 		null AS Annee_renovation,
 		precision.code AS Precision_plan,
-		distributor.name AS Proprietaire,
+		LEFT(distributor.name,30) AS Proprietaire,
 		status.code AS Etat_exploitation,
 		null AS Mesure_plan,
-		element.remark AS Remarque,
-		pressurezone.name AS Zone_pression,
+		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
+		LEFT(pressurezone.name,30) AS Zone_pression,
 		element.fk_folder AS Dossier_id,
 		
 		CASE 

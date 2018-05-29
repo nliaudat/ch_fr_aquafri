@@ -35,7 +35,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_traitement AS
 
 	SELECT 
 		installation.id AS OBJECTID,
-		COALESCE(installation.name, element.identification)  AS Nom,
+		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
 
 		concat_ws('|', 
 			CASE WHEN sanitization_uv IS TRUE THEN 'UV' END, 
@@ -51,11 +51,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_traitement AS
 		
 		remote.code AS Type_transmission,
 		element.year AS Annee_installation,
-		distributor.name AS Proprietaire,
+		LEFT(distributor.name,30) AS Proprietaire,
 		status.code AS Etat_exploitation,
 		null AS Mesure_plan,
-		element.remark AS Remarque,
-		pressurezone.name AS Zone_pression,
+		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
+		LEFT(pressurezone.name,30) AS Zone_pression,
 		element.fk_folder AS Dossier_id,
 		
 		CASE 

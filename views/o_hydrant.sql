@@ -28,10 +28,10 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_hydrant AS
 
 	SELECT 
 		hydrant.id AS OBJECTID,
-		element.identification AS No_hydrant,
+		LEFT(element.identification,10) AS No_hydrant, 
 		CASE WHEN hydrant.underground IS TRUE THEN 'HS' ELSE 'BH' END AS Type_hydrant,
 		hydrant_output.nbr_sorties AS Nbr_sorties,
-		hydrant_output.code AS Diam_sorties,
+		LEFT(hydrant_output.code,30) AS Diam_sorties, 
 		null AS Vidange_auto,
 		hydrant.pressure_static AS P_statique,
 		hydrant.pressure_dynamic AS P_dynamique,
@@ -39,11 +39,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_hydrant AS
 		null AS Resp_entretien,
 		element.year AS Annee_construction,
 		precision.code AS Precision_plan,
-		distributor.name AS Proprietaire,
+		LEFT(distributor.name,30) AS Proprietaire, 
 		status.code AS Etat_exploitation,
-		element.remark AS Remarque,
-		pressurezone.name AS Zone_pression,		
-		element.fk_folder AS Dossier_id,		
+		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque, 
+		LEFT(pressurezone.name,30) AS Zone_pression, 
+		element.fk_folder AS Dossier_id, 	
 		
 		ST_Force2D(element.geometry) AS geometry
 

@@ -29,7 +29,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_vanne AS
 
 	SELECT 
 		valve.id AS OBJECTID,
-		valve.identification AS Nom_numero,
+		LEFT(valve.identification,40) AS Nom_numero,
 		valve_function.code AS Fonction_vanne,
 		
 		CASE 
@@ -44,11 +44,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_vanne AS
 
 		valve.year AS Annee_installation,
 		precision.code AS Precision_plan,
-		distributor.name AS Proprietaire,
+		LEFT(distributor.name,30) AS Proprietaire,
 		status.code AS Etat_exploitation,
-		valve.remark AS Remarque,
+		LEFT(regexp_replace(valve.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
 		valve.orientation AS Orisymbole,
-		pressurezone.name AS Zone_pression,		
+		LEFT(pressurezone.name,30) AS Zone_pression,		
 		valve.fk_folder AS Dossier_id,		
 
 		

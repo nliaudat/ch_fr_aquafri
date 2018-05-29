@@ -48,15 +48,20 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_conduite AS
 		pipe.pressure_nominal AS P_admise,
 		pipe.year AS Annee_construction,
 		precision.code AS Precision_plan,
-		distributor.name AS Proprietaire,
+		LEFT(distributor.name,30) AS Proprietaire,
 		status.code AS Etat_exploitation,
 		null AS Mesure_plan,
-		pipe.remark AS Remarque,
-		pressurezone.name AS Zone_pression,
+		LEFT(regexp_replace(pipe.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
+		LEFT(pressurezone.name,30) AS Zone_pression,
 		pipe._length2d AS SHAPE_Length,
 		pipe.fk_folder AS Dossier_id,
 		
-		-- pipe.label_1_text AS usr_etiquette,
+		/* --specific for mgi
+		CASE WHEN pipe.fk_material > 5000 THEN -- all but undefined & others
+			pipe_material._displayname_fr 
+		ELSE null 
+		END AS usr_etiquette,
+		*/
 		
 		ST_Force2D(pipe.geometry) AS geometry
 
