@@ -1,0 +1,1195 @@
+From a3f6182b33b8403d22462e63b87f5bdde346a258 Mon Sep 17 00:00:00 2001
+From: nliaudat <nliaudat@gmail.com>
+Date: Tue, 29 May 2018 07:47:35 +0200
+Subject: [PATCH] 1.1 release
+
+---
+ README.md                       |  32 ++++++++++++++++++++++------
+ changelog.md                    |  17 +++++++++++++++
+ install.md                      |  26 -----------------------
+ relations/pipe_function.csv     |  14 ++++++-------
+ relations/pipe_function.ods     | Bin 12421 -> 12430 bytes
+ relations/status.csv            |   2 +-
+ relations/status.ods            | Bin 12330 -> 11949 bytes
+ values/pipe_material_enable.sql |  36 ++++++++++++++++----------------
+ views/i_mesure.sql              |   8 +++----
+ views/i_pompe.sql               |  12 +++++------
+ views/i_reducteur.sql           |   8 +++----
+ views/i_traitement.sql          |   8 +++----
+ views/i_vanne.sql               |   8 +++----
+ views/o_captage.sql             |   7 ++++---
+ views/o_chambre.sql             |   6 +++---
+ views/o_conduite.sql            |  13 ++++++++----
+ views/o_hydrant.sql             |  12 +++++------
+ views/o_reservoir.sql           |  10 ++++-----
+ 18 files changed, 118 insertions(+), 101 deletions(-)
+ create mode 100644 changelog.md
+ delete mode 100644 install.md
+
+diff --git a/README.md b/README.md
+index b72ca1c..5dad21b 100644
+--- a/README.md
++++ b/README.md
+@@ -21,11 +21,31 @@ Sample for status table
+ All relations are registered in openOffice sheets under the folder "relations", to be customized for your need. 
+ You can apply your adjustments in the "csv" tab, save it under .csv format (utf-8) and reinstall the extension to apply. 
+ 
+-## Warning
+-That's a work in progress ...
+-Actually, no AquaFri's specific field is imported into qwat
++## Install
+ 
+-Some [values](https://github.com/nliaudat/ch_fr_aquafri/tree/master/values) are added to qwat_vl tables and are not deleted after dropping the extension.
++### Check your postgresql service definition
+ 
+-## Install
+-[Install procedure](https://github.com/nliaudat/ch_fr_aquafri/blob/master/install.md)
++nano /root/.pg_service.conf
++
++[qwat]  
++host=127.0.0.1  
++dbname=qwat  
++port=5432  
++user=postgres  
++password=yours;)  
++
++### launch install
++
++chmod 775 -R ./*
++
++./init_aquafri.sh -p qwat
++
++#### Parameters
++short | long | action
++--- | --- | ---
++-p|--pgservice | PG service to connect to the database. 
++-s|--srid |PostGIS SRID. !! AquaFri MUST use MN95 (EPSG:2056) since 2017-01-01 !! custom srid is autorized for testing purpose 
++-c|--check	|Checks relations between original qwat_vl and custom aquaFri values 
++-d|--disable |Disable extension without deleting anything (safe) 
++-e|--enable |Enable disabled extension 
++-r|--drop-schema |Drop schema (cascaded). Carefull, it clears all custom tables and values inserted in qwat_vl. 
+\ No newline at end of file
+diff --git a/changelog.md b/changelog.md
+new file mode 100644
+index 0000000..81e64c5
+--- /dev/null
++++ b/changelog.md
+@@ -0,0 +1,17 @@
++# Changelog
++
++
++#### Version 1.1
++Object | Field |Changes 
++--- | --- | --- 
++All views |all string fields | <ul><li>arcgis desktop doesn't import fields larger than destination (without complain). </li><li>delete newlines char in "remark"</li></ul>
++table pipe_function | * | <ul><li> "10001 - conduite sprinkler" code changed to "CS" cause "SP" has another signification </li><li> "4104 - Conduite d'adduction" mapped to "CC - conduite de captage" instead of NA</li></ul>
++table status | * | "1307 - fictif " mapped to ES (en service) instead of PL (nouveau planifie)
++views o_reservoir | altitude_overflow| force decimal type - arcgis import bugfix
++views i_pompe | <ul><li> altitude  </li><li> manometric_height</li></ul> | force decimal type - arcgis import bugfix
++views o_captage| remark | add field "Remarques" not in database description, but in gdb.
++qwat_vl pipe_material| diameter_internal | add default values for "diameter_internal" on unknown material but with diameter
++
++
++#### Version 1.0
++Initial release
+\ No newline at end of file
+diff --git a/install.md b/install.md
+deleted file mode 100644
+index f2cd4dc..0000000
+--- a/install.md
++++ /dev/null
+@@ -1,26 +0,0 @@
+-## Check your postgresql service definition
+-
+-nano /root/.pg_service.conf
+-
+-[qwat]  
+-host=127.0.0.1  
+-dbname=qwat  
+-port=5432  
+-user=postgres  
+-password=yours;)  
+-
+-## launch install
+-
+-chmod 775 -R ./*
+-
+-./init_aquafri.sh -p qwat
+-
+-#### Parameters
+-short | long | action
+---- | --- | ---
+--p|--pgservice | PG service to connect to the database. 
+--s|--srid |PostGIS SRID. !! AquaFri MUST use MN95 (EPSG:2056) since 2017-01-01 !! custom srid is autorized for testing purpose 
+--c|--check	|Checks relations between original qwat_vl and custom aquaFri values 
+--d|--disable |Disable extension without deleting anything (safe) 
+--e|--enable |Enable disabled extension 
+--r|--drop-schema |Drop schema (cascaded). Carefull, it clears all custom tables and values inserted in qwat_vl. 
+diff --git a/relations/pipe_function.csv b/relations/pipe_function.csv
+index 012eab5..37bc142 100644
+--- a/relations/pipe_function.csv
++++ b/relations/pipe_function.csv
+@@ -1,17 +1,17 @@
+ "id","code"
+-101,"NA"
++101,"CI"
+ 102,"NA"
+ 103,"NA"
+ 4101,"CT"
+ 4102,"CH"
+ 4103,"CV"
+-4104,"NA"
++4104,"CC"
+ 4105,"CD"
+-4106,"NA"
+-4107,"NA"
++4106,"CB"
++4107,"CD"
+ 4108,"CB"
+-4109,"NA"
++4109,"CT"
+ 4110,"DR"
+-4111,"NA"
++4111,"CV"
+ 4112,"NA"
+-10001,"SP"
++10001,"CS"
+diff --git a/relations/pipe_function.ods b/relations/pipe_function.ods
+index d703f6e7453aa11eb0fc16476b4dc53d5a420cea..b24fe978a3534eaf261af58ec43093fe6ebdd0a5 100644
+GIT binary patch
+delta 9273
+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
+
+delta 9346
+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
+a*~k0Bv%ltmK=H9g&zX=P9`6t!(Ek7zfbW|C
+
+diff --git a/relations/status.csv b/relations/status.csv
+index 9a72ae8..791b516 100644
+--- a/relations/status.csv
++++ b/relations/status.csv
+@@ -8,4 +8,4 @@
+ 1304,"HS"
+ 1305,"HS"
+ 1306,"PL"
+-1307,"PL"
++1307,"ES"
+diff --git a/relations/status.ods b/relations/status.ods
+index aeec01d143217878ef34950c06d6b9e4017f1cf2..ea85ff6f82643cb75c14319995ccc2726d8630e0 100644
+GIT binary patch
+delta 8673
+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
+
+delta 9118
+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
+
+diff --git a/values/pipe_material_enable.sql b/values/pipe_material_enable.sql
+index 0dc3a47..c3bcbdf 100644
+--- a/values/pipe_material_enable.sql
++++ b/values/pipe_material_enable.sql
+@@ -28,21 +28,21 @@ INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter,
+ INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10028,true,'PL','Plastique',null,null,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+ INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10029,true,'TC','Tuyau Ciment',10,10,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+ INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10030,true,'TC','Tuyau Ciment',15,15,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10031,true,'Inc./A Ø','Inconnu / Autre avec diamètre',300,300,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10032,true,'Inc./A Ø','Inconnu / Autre avec diamètre',250,250,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10033,true,'Inc./A Ø','Inconnu / Autre avec diamètre',200,200,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10034,true,'Inc./A Ø','Inconnu / Autre avec diamètre',180,180,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10035,true,'Inc./A Ø','Inconnu / Autre avec diamètre',175,175,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10036,true,'Inc./A Ø','Inconnu / Autre avec diamètre',150,150,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10037,true,'Inc./A Ø','Inconnu / Autre avec diamètre',125,125,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10038,true,'Inc./A Ø','Inconnu / Autre avec diamètre',120,120,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10039,true,'Inc./A Ø','Inconnu / Autre avec diamètre',100,100,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10040,true,'Inc./A Ø','Inconnu / Autre avec diamètre',80,80,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10041,true,'Inc./A Ø','Inconnu / Autre avec diamètre',75,75,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10042,true,'Inc./A Ø','Inconnu / Autre avec diamètre',70,70,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10043,true,'Inc./A Ø','Inconnu / Autre avec diamètre',63,63,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10044,true,'Inc./A Ø','Inconnu / Autre avec diamètre',50,50,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10045,true,'Inc./A Ø','Inconnu / Autre avec diamètre',40,40,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10046,true,'Inc./A Ø','Inconnu / Autre avec diamètre',32,32,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10047,true,'Inc./A Ø','Inconnu / Autre avec diamètre',25,25,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+-INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10048,true,'Inc./A Ø','Inconnu / Autre avec diamètre',20,20,null,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+\ No newline at end of file
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10031,true,'Inc./A Ø','Inconnu / Autre avec diamètre',300,300,300,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10032,true,'Inc./A Ø','Inconnu / Autre avec diamètre',250,250,250,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10033,true,'Inc./A Ø','Inconnu / Autre avec diamètre',200,200,300,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10034,true,'Inc./A Ø','Inconnu / Autre avec diamètre',180,180,180,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10035,true,'Inc./A Ø','Inconnu / Autre avec diamètre',175,175,175,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10036,true,'Inc./A Ø','Inconnu / Autre avec diamètre',150,150,150,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10037,true,'Inc./A Ø','Inconnu / Autre avec diamètre',125,125,150,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10038,true,'Inc./A Ø','Inconnu / Autre avec diamètre',120,120,120,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10039,true,'Inc./A Ø','Inconnu / Autre avec diamètre',100,100,100,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10040,true,'Inc./A Ø','Inconnu / Autre avec diamètre',80,80,80,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10041,true,'Inc./A Ø','Inconnu / Autre avec diamètre',75,75,75,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10042,true,'Inc./A Ø','Inconnu / Autre avec diamètre',70,70,70,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10043,true,'Inc./A Ø','Inconnu / Autre avec diamètre',63,63,63,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10044,true,'Inc./A Ø','Inconnu / Autre avec diamètre',50,50,50,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10045,true,'Inc./A Ø','Inconnu / Autre avec diamètre',40,40,40,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10046,true,'Inc./A Ø','Inconnu / Autre avec diamètre',32,32,32,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10047,true,'Inc./A Ø','Inconnu / Autre avec diamètre',25,25,25,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
++INSERT INTO qwat_vl.pipe_material (id, vl_active, short_fr, value_fr, diameter, diameter_nominal, diameter_internal, diameter_external, pressure_nominal) VALUES (10048,true,'Inc./A Ø','Inconnu / Autre avec diamètre',20,20,20,null,null) ON CONFLICT (id) DO UPDATE  SET vl_active = 'TRUE';
+\ No newline at end of file
+diff --git a/views/i_mesure.sql b/views/i_mesure.sql
+index 7517600..5f6997f 100644
+--- a/views/i_mesure.sql
++++ b/views/i_mesure.sql
+@@ -23,7 +23,7 @@ Zone_pression : Code unique qui indique l’appartenance d’un objet à une zon
+ 		SELECT 
+ 		
+ 			element.id AS OBJECTID,
+-			element.identification AS Nom_numero,
++			LEFT(element.identification,40) AS Nom_numero,
+ 			
+ 			'DM' AS Type_mesure,
+ 			
+@@ -31,10 +31,10 @@ Zone_pression : Code unique qui indique l’appartenance d’un objet à une zon
+ 			null AS Centrale_id,
+ 			
+ 			element.year AS Annee_installation,
+-			distributor.name AS Proprietaire,
++			LEFT(distributor.name,30) AS Proprietaire,
+ 			status.code AS Etat_exploitation,
+-			element.remark AS Remarque,
+-			pressurezone.name AS Zone_pression,		
++			LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
++			LEFT(pressurezone.name,30) AS Zone_pression,		
+ 			element.fk_folder AS Dossier_id,	
+ 			
+ 			CASE 
+diff --git a/views/i_pompe.sql b/views/i_pompe.sql
+index 4c6f000..316213b 100644
+--- a/views/i_pompe.sql
++++ b/views/i_pompe.sql
+@@ -23,19 +23,19 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_pompe AS
+ 
+ 	SELECT 
+ 		installation.id AS OBJECTID,
+-		COALESCE(installation.name, element.identification)  AS Nom,
++		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
+ 		remote.code AS Type_transmission,
+ 		null AS Centrale_id,
+ 		installation.no_pumps AS Nbr_pompes,
+ 		installation.rejected_flow::INTEGER AS Q_refoulement,
+-		element.altitude AS Niv,
+-		installation.manometric_height AS H_mano,
++		element.altitude::DECIMAL AS Niv, --gdb need to be double type instead of float
++		installation.manometric_height::DECIMAL AS H_mano, --gdb need to be double type instead of float
+ 		element.year AS Annee_installation,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+-		element.remark AS Remarque,
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ),80) AS Remarque,
+ 		element.orientation AS Orisymbole,
+-		pressurezone.name AS Zone_pression,
++		LEFT(pressurezone.name,30) AS Zone_pression,
+ 		element.fk_folder AS Dossier_id,
+ 		
+ 		CASE 
+diff --git a/views/i_reducteur.sql b/views/i_reducteur.sql
+index 2d4c378..d6ee04b 100644
+--- a/views/i_reducteur.sql
++++ b/views/i_reducteur.sql
+@@ -22,7 +22,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_reducteur AS
+ 
+ 	SELECT 
+ 		installation.id AS OBJECTID,
+-		COALESCE(installation.name, element.identification)  AS Nom,
++		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
+ 		
+ 		CASE WHEN fk_pressurecontrol_type = 2801 THEN 
+ 			'RE' -- réducteur
+@@ -34,11 +34,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_reducteur AS
+ 
+ 		remote.code AS Type_transmission,
+ 		element.year AS Annee_installation,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+-		element.remark AS Remarque,
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
+ 		element.orientation AS Orisymbole,
+-		pressurezone.name AS Zone_pression,
++		LEFT(pressurezone.name,30) AS Zone_pression,
+ 		element.fk_folder AS Dossier_id,
+ 		
+ 		CASE 
+diff --git a/views/i_traitement.sql b/views/i_traitement.sql
+index 0809f42..9beb9d2 100644
+--- a/views/i_traitement.sql
++++ b/views/i_traitement.sql
+@@ -35,7 +35,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_traitement AS
+ 
+ 	SELECT 
+ 		installation.id AS OBJECTID,
+-		COALESCE(installation.name, element.identification)  AS Nom,
++		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
+ 
+ 		concat_ws('|', 
+ 			CASE WHEN sanitization_uv IS TRUE THEN 'UV' END, 
+@@ -51,11 +51,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_traitement AS
+ 		
+ 		remote.code AS Type_transmission,
+ 		element.year AS Annee_installation,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+ 		null AS Mesure_plan,
+-		element.remark AS Remarque,
+-		pressurezone.name AS Zone_pression,
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
++		LEFT(pressurezone.name,30) AS Zone_pression,
+ 		element.fk_folder AS Dossier_id,
+ 		
+ 		CASE 
+diff --git a/views/i_vanne.sql b/views/i_vanne.sql
+index 9d8a119..9057e58 100644
+--- a/views/i_vanne.sql
++++ b/views/i_vanne.sql
+@@ -29,7 +29,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_vanne AS
+ 
+ 	SELECT 
+ 		valve.id AS OBJECTID,
+-		valve.identification AS Nom_numero,
++		LEFT(valve.identification,40) AS Nom_numero,
+ 		valve_function.code AS Fonction_vanne,
+ 		
+ 		CASE 
+@@ -44,11 +44,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.i_vanne AS
+ 
+ 		valve.year AS Annee_installation,
+ 		precision.code AS Precision_plan,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+-		valve.remark AS Remarque,
++		LEFT(regexp_replace(valve.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
+ 		valve.orientation AS Orisymbole,
+-		pressurezone.name AS Zone_pression,		
++		LEFT(pressurezone.name,30) AS Zone_pression,		
+ 		valve.fk_folder AS Dossier_id,		
+ 
+ 		
+diff --git a/views/o_captage.sql b/views/o_captage.sql
+index ed127d4..14fe39e 100644
+--- a/views/o_captage.sql
++++ b/views/o_captage.sql
+@@ -32,7 +32,7 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_captage AS
+ 
+ 	SELECT 
+ 		installation.id AS OBJECTID,
+-		COALESCE(installation.name, element.identification)  AS Nom,
++		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
+ 
+ 		CASE 
+ 			WHEN gathering_chamber = true THEN 'CR' -- chambre de rassemblement
+@@ -55,10 +55,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_captage AS
+ 		
+ 		
+ 		precision.code AS Precision_plan,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+ 		null AS Mesure_plan,
+-		pressurezone.name AS Zone_pression,
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
++		LEFT(pressurezone.name,30) AS Zone_pression,
+ 		element.fk_folder AS Dossier_id,
+ 		
+ 		
+diff --git a/views/o_chambre.sql b/views/o_chambre.sql
+index e7e62e5..b03990f 100644
+--- a/views/o_chambre.sql
++++ b/views/o_chambre.sql
+@@ -25,16 +25,16 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_chambre AS
+ 
+ 	SELECT 
+ 		installation.id AS OBJECTID,
+-		COALESCE(installation.name, element.identification)  AS Nom,
++		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
+ 
+ 		'CG' AS Fonction_chambre,
+ 		--CASE WHEN networkseparation IS TRUE THEN 'VA' ELSE 'CG' END AS Fonction_chambre, --specific for mgi
+ 		year AS Annee_construction,
+ 		precision.code AS Precision_plan,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+ 		null AS Mesure_plan,
+-		element.remark AS Remarque,
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
+ 		element.orientation AS Orisymbole,
+ 		element.fk_folder AS Dossier_id,
+ 		
+diff --git a/views/o_conduite.sql b/views/o_conduite.sql
+index c5899a2..f26cd86 100644
+--- a/views/o_conduite.sql
++++ b/views/o_conduite.sql
+@@ -48,15 +48,20 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_conduite AS
+ 		pipe.pressure_nominal AS P_admise,
+ 		pipe.year AS Annee_construction,
+ 		precision.code AS Precision_plan,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+ 		null AS Mesure_plan,
+-		pipe.remark AS Remarque,
+-		pressurezone.name AS Zone_pression,
++		LEFT(regexp_replace(pipe.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
++		LEFT(pressurezone.name,30) AS Zone_pression,
+ 		pipe._length2d AS SHAPE_Length,
+ 		pipe.fk_folder AS Dossier_id,
+ 		
+-		-- pipe.label_1_text AS usr_etiquette,
++		/* --specific for mgi
++		CASE WHEN pipe.fk_material > 5000 THEN -- all but undefined & others
++			pipe_material._displayname_fr 
++		ELSE null 
++		END AS usr_etiquette,
++		*/
+ 		
+ 		ST_Force2D(pipe.geometry) AS geometry
+ 
+diff --git a/views/o_hydrant.sql b/views/o_hydrant.sql
+index 66f9e00..c54f5c2 100644
+--- a/views/o_hydrant.sql
++++ b/views/o_hydrant.sql
+@@ -28,10 +28,10 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_hydrant AS
+ 
+ 	SELECT 
+ 		hydrant.id AS OBJECTID,
+-		element.identification AS No_hydrant,
++		LEFT(element.identification,10) AS No_hydrant, 
+ 		CASE WHEN hydrant.underground IS TRUE THEN 'HS' ELSE 'BH' END AS Type_hydrant,
+ 		hydrant_output.nbr_sorties AS Nbr_sorties,
+-		hydrant_output.code AS Diam_sorties,
++		LEFT(hydrant_output.code,30) AS Diam_sorties, 
+ 		null AS Vidange_auto,
+ 		hydrant.pressure_static AS P_statique,
+ 		hydrant.pressure_dynamic AS P_dynamique,
+@@ -39,11 +39,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_hydrant AS
+ 		null AS Resp_entretien,
+ 		element.year AS Annee_construction,
+ 		precision.code AS Precision_plan,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire, 
+ 		status.code AS Etat_exploitation,
+-		element.remark AS Remarque,
+-		pressurezone.name AS Zone_pression,		
+-		element.fk_folder AS Dossier_id,		
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque, 
++		LEFT(pressurezone.name,30) AS Zone_pression, 
++		element.fk_folder AS Dossier_id, 	
+ 		
+ 		ST_Force2D(element.geometry) AS geometry
+ 
+diff --git a/views/o_reservoir.sql b/views/o_reservoir.sql
+index 1a85ed4..6c8cf96 100644
+--- a/views/o_reservoir.sql
++++ b/views/o_reservoir.sql
+@@ -26,11 +26,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_reservoir AS
+ 
+ 	SELECT 
+ 		installation.id AS OBJECTID,
+-		COALESCE(installation.name, element.identification)  AS Nom,
++		LEFT(COALESCE(installation.name, element.identification),40) AS Nom,
+ 
+ 		'RS' AS Type_reservoir,
+ 		
+-		altitude_overflow AS Niv_eau,
++		altitude_overflow::DECIMAL  AS Niv_eau,
+ 		
+ 		storage_supply::INTEGER AS V_utilisation,
+ 		null AS V_securite, --add in Qwat datamodel ?
+@@ -39,11 +39,11 @@ CREATE OR REPLACE VIEW qwat_ch_fr_aquafri.o_reservoir AS
+ 		year AS Annee_construction,
+ 		null AS Annee_renovation,
+ 		precision.code AS Precision_plan,
+-		distributor.name AS Proprietaire,
++		LEFT(distributor.name,30) AS Proprietaire,
+ 		status.code AS Etat_exploitation,
+ 		null AS Mesure_plan,
+-		element.remark AS Remarque,
+-		pressurezone.name AS Zone_pression,
++		LEFT(regexp_replace(element.remark, E'[\\n\\r\\f\\u000B\\u0085\\u2028\\u2029]+', ' ', 'g' ) , 80) AS Remarque,
++		LEFT(pressurezone.name,30) AS Zone_pression,
+ 		element.fk_folder AS Dossier_id,
+ 		
+ 		CASE 
+-- 
+2.17.0.windows.1
+
