@@ -1,5 +1,7 @@
 # ch_fr_aquafri
-[qwat-data-model](https://github.com/qwat/qwat-data-model) extension for exporting to [AquaFri](http://www.fr.ch/saav/fr/pub/securite_alimentaire/eau_potable/aquafri_print.cfm)'s data model
+[qwat-data-model](https://github.com/qwat/qwat-data-model) extension for exporting to Fribourg's [AquaFri](http://www.fr.ch/saav/fr/pub/securite_alimentaire/eau_potable/aquafri_print.cfm) data model
+
+*For importing, refer to [qwat-import-sample](https://github.com/nliaudat/qwat-import-sample)*
 
 ## What does it do
 
